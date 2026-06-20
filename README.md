@@ -9,17 +9,8 @@ A PowerShell parser and technical documentation for the `.red` file format used 
 
 ## Usage
 
-Place `.red` files in `src/userdata/`, then run the parser from the `src/` directory:
-
-```powershell
-cd src
-.\ParseRedToJson.ps1
-```
-
-Parsed `.json` files are written to `src/output/`.
-
-## Notes
-
-- `.red` files are saved by the game at `%USERPROFILE%\My Documents\Midnight Club 2\savegame\<profile>\` alongside the `.sav` profile file.
-- File names follow the pattern `<profile><city><index>.red` (e.g. `CCR 01LA3.red`).
-- The in-game Race Editor UI supports up to 4 CPU opponents; the engine supports up to 6.
+1. Make a backup of your `/userdata` folder, just in case.
+2. Place the parser scripts in the root of your Midnight Club 2 directory.
+3. Execute ParseRedToJson.ps1 to parse your `/userdata/*.red` files to `/userjson/*.json` files.
+4. Inspect the `.json` files and make edits if appropriate.
+5. Execute ParseJsonToRed.ps1 to parse the `/userjson/*.json`files back to `/userdata/*.red` files.

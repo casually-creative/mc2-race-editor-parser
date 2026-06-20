@@ -1,5 +1,5 @@
 # Midnight Club 2 Race Editor (.red) file parser
-# Reads all *.red files from ./userdata/ and writes one *.json per file into ./output/
+# Reads all *.red files from ./userdata/ and writes one *.json per file into ./userjson/
 
 # Load enum data from spec/race.schema.json — single source of truth
 $specDir    = Join-Path (Split-Path -Parent $PSScriptRoot) "spec"
@@ -91,7 +91,7 @@ function Format-JsonAllman([string]$json) {
     return $sb.ToString()
 }
 
-function Parse-RedFile([string]$path) {
+function Read-RedFile([string]$path) {
     $b = [System.IO.File]::ReadAllBytes($path)
 
     if ($b.Length -ne 222) {
@@ -199,11 +199,11 @@ function Parse-RedFile([string]$path) {
     return $result
 }
 
-$outputDir   = Join-Path $PSScriptRoot "output"
 $userdataDir = Join-Path $PSScriptRoot "userdata"
+$userjsonDir = Join-Path $PSScriptRoot "userjson"
 
-if (-not (Test-Path $outputDir)) {
-    New-Item -ItemType Directory -Path $outputDir | Out-Null
+if (-not (Test-Path $userjsonDir)) {
+    New-Item -ItemType Directory -Path $userjsonDir | Out-Null
 }
 
 $canValidate = $PSVersionTable.PSVersion -ge [version]"6.1"
@@ -215,11 +215,11 @@ $redFiles  = Get-ChildItem (Join-Path $userdataDir "*.red") | Sort-Object { [reg
 $fileCount = 0
 
 foreach ($file in $redFiles) {
-    $data = Parse-RedFile $file.FullName
+    $data = Read-RedFile $file.FullName
     if ($null -eq $data) { continue }
 
     $jsonName = [System.IO.Path]::GetFileNameWithoutExtension($file.Name) + ".json"
-    $jsonPath = Join-Path $outputDir $jsonName
+    $jsonPath = Join-Path $userjsonDir $jsonName
     $raw = $data | ConvertTo-Json -Depth 5 -Compress
 
     if ($canValidate) {
@@ -236,4 +236,4 @@ foreach ($file in $redFiles) {
 }
 
 Write-Host ""
-Write-Host "$fileCount file(s) written to: $outputDir"
+Write-Host "$fileCount file(s) written to: $userjsonDir"
