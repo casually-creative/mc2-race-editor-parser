@@ -6,7 +6,7 @@ A PowerShell parser and technical documentation for the `.red` file format used 
 
 | File | Description |
 |------|-------------|
-| [`src/ParseRedToJson.ps1`](src/ParseRedToJson.ps1) | Reads all `.red` files from `src/userdata/` and writes one `.json` per file to `src/userjson/`. |
+| [`src/ParseRedToJson.ps1`](src/ParseRedToJson.ps1) | Reads all `.red` files from `/userdata` and writes one `.json` per file to `/userjson`. |
 | [`spec/race.schema.json`](spec/race.schema.json) | JSON Schema (Draft 2020-12) for the race JSON format. Single source of truth for all enum data; the parser reads its lookup tables directly from this file. |
 | [`docs/RedFileFormat.md`](docs/RedFileFormat.md) | Full technical documentation of the `.red` binary format: byte map, enumerations, checkpoint layout, parsing rules, serialization rules, and padding sentinels. |
 | [`docs/PowershellNotes.md`](docs/PowershellNotes.md) | Notes and constraints for letting Github Copilot run PowerShell scripts in VS Code. |
