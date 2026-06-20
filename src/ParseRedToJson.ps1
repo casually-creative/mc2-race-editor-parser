@@ -1,19 +1,25 @@
 # Midnight Club 2 Race Editor (.red) file parser
 # Reads all *.red files from ./userdata/ and writes one *.json per file into ./output/
 
-# Load shared enum data from spec/enums.json
-$specDir  = Join-Path (Split-Path -Parent $PSScriptRoot) "spec"
-$enums    = Get-Content (Join-Path $specDir "enums.json") -Raw | ConvertFrom-Json
+# Load enum data from spec/race.schema.json — single source of truth
+$specDir    = Join-Path (Split-Path -Parent $PSScriptRoot) "spec"
+$schemaJson = Get-Content (Join-Path $specDir "race.schema.json") -Raw
+$schema     = $schemaJson | ConvertFrom-Json
 
-$cities       = [string[]]$enums.cities
-$todNames     = [string[]]$enums.timesOfDay
-$weatherNames = [string[]]$enums.weatherTypes
-$traffNames   = [string[]]$enums.trafficLevels
-$vehicles     = [string[]]$enums.vehicles
+$cities       = [string[]]$schema.properties.city.enum
+$todNames     = [string[]]$schema.properties.timeOfDay.enum
+$weatherNames = [string[]]$schema.properties.weather.enum
+$traffNames   = [string[]]$schema.properties.traffic.enum
+$vehicles     = [string[]]($schema.'$defs'.vehicleSlot.enum | Where-Object { $_ -ne $null })
 
+# Build raceModes lookup: byte values start at 4, timeMode cycles within each raceType
 $raceModes = @{}
-foreach ($rm in $enums.raceModes) {
-    $raceModes[[int]$rm.byte] = @{ Type = [string]$rm.raceType; Time = [string]$rm.timeMode }
+$byte = 4
+foreach ($rt in $schema.properties.raceType.enum) {
+    foreach ($tm in $schema.properties.timeMode.enum) {
+        $raceModes[$byte] = @{ Type = $rt; Time = $tm }
+        $byte++
+    }
 }
 
 $includeExtendedCpu = $false
@@ -195,7 +201,6 @@ function Parse-RedFile([string]$path) {
 
 $outputDir   = Join-Path $PSScriptRoot "output"
 $userdataDir = Join-Path $PSScriptRoot "userdata"
-$schemaJson  = Get-Content (Join-Path $specDir "race.schema.json") -Raw
 
 if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir | Out-Null
@@ -203,10 +208,10 @@ if (-not (Test-Path $outputDir)) {
 
 $canValidate = $PSVersionTable.PSVersion -ge [version]"6.1"
 if (-not $canValidate) {
-    Write-Warning "Schema validation requires PowerShell 6.1 or later — skipping."
+    Write-Warning "Schema validation requires PowerShell 6.1 or later - skipping."
 }
 
-$redFiles  = Get-ChildItem (Join-Path $userdataDir "*.red")
+$redFiles  = Get-ChildItem (Join-Path $userdataDir "*.red") | Sort-Object { [regex]::Replace($_.BaseName, '\d+', { $args[0].Value.PadLeft(10, '0') }) }
 $fileCount = 0
 
 foreach ($file in $redFiles) {
