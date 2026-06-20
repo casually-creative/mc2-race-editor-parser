@@ -1,55 +1,19 @@
 # Midnight Club 2 Race Editor (.red) file parser
-# Reads all *.red files in the same folder and writes one *.json per file into ./output/
+# Reads all *.red files from ./userdata/ and writes one *.json per file into ./output/
 
-$cities       = @("Los Angeles", "Paris", "Tokyo")
-$todNames     = @("Dawn", "Midnight", "Dusk")
-$weatherNames = @("Clear", "Foggy", "Rainy")
-$traffNames   = @("None", "Low", "Medium", "High")
+# Load shared enum data from spec/enums.json
+$specDir  = Join-Path (Split-Path -Parent $PSScriptRoot) "spec"
+$enums    = Get-Content (Join-Path $specDir "enums.json") -Raw | ConvertFrom-Json
 
-# Vehicle indices (0-based, matches in-game selection order)
-$vehicles = @(
-    "Cocotte",
-    "City",
-    "Emu",
-    "Torrida",
-    "1971 Bestia",
-    "Interna",
-    "Cohete",
-    "Citi Turbo",
-    "Monstruo",
-    "Jersey XS",
-    "Boost",
-    "Bryanston V",
-    "Schneller V8",
-    "Alarde",
-    "Fripon X",
-    "Monsoni",
-    "Stadt",
-    "Victory",
-    "Modo Prego",
-    "Lusso XT",
-    "RSMC 15",
-    "Vortex 5",
-    "Saikou",
-    "Knight",
-    "Nousagi",
-    "Saikou XS",
-    "Torque JX",
-    "Veloci",
-    "SLF450x",
-    "LA Cop",
-    "Paris Cop",
-    "Tokyo Cop"
-)
+$cities       = [string[]]$enums.cities
+$todNames     = [string[]]$enums.timesOfDay
+$weatherNames = [string[]]$enums.weatherTypes
+$traffNames   = [string[]]$enums.trafficLevels
+$vehicles     = [string[]]$enums.vehicles
 
-# Race type + Time mode combined enum at 0x10
-$raceModes = @{
-    4 = @{ Type = "Unordered"; Time = "None" }
-    5 = @{ Type = "Unordered"; Time = "Reset each checkpoint" }
-    6 = @{ Type = "Unordered"; Time = "Added each checkpoint" }
-    7 = @{ Type = "Ordered";   Time = "None" }
-    8 = @{ Type = "Ordered";   Time = "Reset each checkpoint" }
-    9 = @{ Type = "Ordered";   Time = "Added each checkpoint" }
+$raceModes = @{}
+foreach ($rm in $enums.raceModes) {
+    $raceModes[[int]$rm.byte] = @{ Type = [string]$rm.raceType; Time = [string]$rm.timeMode }
 }
 
 $includeExtendedCpu = $false
@@ -229,15 +193,21 @@ function Parse-RedFile([string]$path) {
     return $result
 }
 
-$folder    = Split-Path -Parent $MyInvocation.MyCommand.Path
-$outputDir = Join-Path $folder "output"
+$outputDir   = Join-Path $PSScriptRoot "output"
+$userdataDir = Join-Path $PSScriptRoot "userdata"
+$schemaJson  = Get-Content (Join-Path $specDir "race.schema.json") -Raw
 
 if (-not (Test-Path $outputDir)) {
     New-Item -ItemType Directory -Path $outputDir | Out-Null
 }
 
-$redFiles = Get-ChildItem (Join-Path $folder "*.red")
-$count    = 0
+$canValidate = $PSVersionTable.PSVersion -ge [version]"6.1"
+if (-not $canValidate) {
+    Write-Warning "Schema validation requires PowerShell 6.1 or later — skipping."
+}
+
+$redFiles  = Get-ChildItem (Join-Path $userdataDir "*.red")
+$fileCount = 0
 
 foreach ($file in $redFiles) {
     $data = Parse-RedFile $file.FullName
@@ -246,11 +216,19 @@ foreach ($file in $redFiles) {
     $jsonName = [System.IO.Path]::GetFileNameWithoutExtension($file.Name) + ".json"
     $jsonPath = Join-Path $outputDir $jsonName
     $raw = $data | ConvertTo-Json -Depth 5 -Compress
-    Format-JsonAllman $raw | Set-Content -Encoding UTF8 -Path $jsonPath
 
+    if ($canValidate) {
+        $isValid = Test-Json -Json $raw -Schema $schemaJson -ErrorVariable schemaErrors -ErrorAction SilentlyContinue
+        if (-not $isValid) {
+            Write-Warning "$($file.Name): schema validation failed:"
+            foreach ($e in $schemaErrors) { Write-Warning "  $($e.Exception.Message)" }
+        }
+    }
+
+    Format-JsonAllman $raw | Set-Content -Encoding UTF8 -Path $jsonPath
     Write-Host "Wrote $jsonName"
-    $count++
+    $fileCount++
 }
 
 Write-Host ""
-Write-Host "$count file(s) written to: $outputDir"
+Write-Host "$fileCount file(s) written to: $outputDir"

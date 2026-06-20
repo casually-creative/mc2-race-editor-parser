@@ -1,0 +1,176 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "spec/race.schema.json",
+    "$comment": "Enum arrays (cities, timesOfDay, weatherTypes, trafficLevels, vehicles, raceModes) are also defined in spec/enums.json, which is the runtime data source for the parser scripts. Both files must be kept in sync.",
+    "title": "Midnight Club 2 Race Editor Race",
+    "description": "Describes a single custom race created with the Midnight Club 2 Race Editor (.red file format).",
+    "type": "object",
+    "required":
+    [
+        "name",
+        "city",
+        "timeOfDay",
+        "weather",
+        "raceType",
+        "timeMode",
+        "laps",
+        "traffic",
+        "pedestrians",
+        "cpuPlayers",
+        "cpuVehicleA",
+        "cpuVehicleB",
+        "checkpoints"
+    ],
+    "additionalProperties": false,
+    "properties":
+    {
+        "name":
+        {
+            "description": "Race name. Max 12 printable ASCII characters.",
+            "type": "string",
+            "maxLength": 12,
+            "pattern": "^[ -~]{0,12}$"
+        },
+        "city":
+        {
+            "type": "string",
+            "enum": ["Los Angeles", "Paris", "Tokyo"]
+        },
+        "timeOfDay":
+        {
+            "type": "string",
+            "enum": ["Dawn", "Midnight", "Dusk"]
+        },
+        "weather":
+        {
+            "type": "string",
+            "enum": ["Clear", "Foggy", "Rainy"]
+        },
+        "raceType":
+        {
+            "type": "string",
+            "enum": ["Unordered", "Ordered"]
+        },
+        "timeMode":
+        {
+            "type": "string",
+            "enum": ["None", "Reset each checkpoint", "Added each checkpoint"]
+        },
+        "laps":
+        {
+            "description": "Number of laps. null for Unordered races (stored in the file but ignored by the game).",
+            "oneOf":
+            [
+                { "type": "integer", "minimum": 1, "maximum": 4 },
+                { "type": "null" }
+            ]
+        },
+        "traffic":
+        {
+            "type": "string",
+            "enum": ["None", "Low", "Medium", "High"]
+        },
+        "pedestrians":
+        {
+            "type": "string",
+            "enum": ["Off", "On"]
+        },
+        "cpuPlayers":
+        {
+            "description": "Number of CPU opponents. The in-game Race Editor UI caps at 4; the engine supports up to 6.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+        },
+        "cpuVehicleA":
+        {
+            "description": "Vehicle assigned to CPU players 1 and 3 (Group A). null when cpuPlayers < 1.",
+            "oneOf":
+            [
+                { "$ref": "#/$defs/vehicleName" },
+                { "type": "null" }
+            ]
+        },
+        "cpuVehicleB":
+        {
+            "description": "Vehicle assigned to CPU players 2 and 4 (Group B). null when cpuPlayers < 2.",
+            "oneOf":
+            [
+                { "$ref": "#/$defs/vehicleName" },
+                { "type": "null" }
+            ]
+        },
+        "checkpoints":
+        {
+            "description": "Ordered list of checkpoints. Maximum 64.",
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 64,
+            "items":
+            {
+                "type": "object",
+                "required": ["node", "timeBonus"],
+                "additionalProperties": false,
+                "properties":
+                {
+                    "node":
+                    {
+                        "description": "Checkpoint node ID.",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 65535
+                    },
+                    "timeBonus":
+                    {
+                        "description": "Time bonus awarded at this checkpoint, in seconds. 0 is valid and means no time is added.",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 60
+                    }
+                }
+            }
+        }
+    },
+    "$defs":
+    {
+        "vehicleName":
+        {
+            "type": "string",
+            "enum":
+            [
+                "Cocotte",
+                "City",
+                "Emu",
+                "Torrida",
+                "1971 Bestia",
+                "Interna",
+                "Cohete",
+                "Citi Turbo",
+                "Monstruo",
+                "Jersey XS",
+                "Boost",
+                "Bryanston V",
+                "Schneller V8",
+                "Alarde",
+                "Fripon X",
+                "Monsoni",
+                "Stadt",
+                "Victory",
+                "Modo Prego",
+                "Lusso XT",
+                "RSMC 15",
+                "Vortex 5",
+                "Saikou",
+                "Knight",
+                "Nousagi",
+                "Saikou XS",
+                "Torque JX",
+                "Veloci",
+                "SLF450x",
+                "LA Cop",
+                "Paris Cop",
+                "Tokyo Cop"
+            ]
+        }
+    }
+}
