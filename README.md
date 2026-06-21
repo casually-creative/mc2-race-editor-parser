@@ -20,3 +20,18 @@ A PowerShell parser and technical documentation for the `.red` file format used 
 3. Execute ParseRedToJson.ps1 to parse your `/userdata/*.red` files to `/userjson/*.json` files.
 4. Inspect the `.json` files and make edits where wanted. Be sure to follow the specs for valid values.
 5. Execute ParseJsonToRed.ps1 to parse the `/userjson/*.json` files back to `/userdata/*.red` files.
+
+## Development
+
+The scripts in `src/` are the source of truth. They reference `src/race.schema.json` at runtime for all enum data and validation. Do not edit the files in `dist/` directly — they are generated.
+
+**Workflow:**
+1. Edit the source scripts in `src/` or the schema in `src/race.schema.json`.
+2. Run the build to produce standalone distributable scripts:
+   ```powershell
+   pwsh .\dev\Build.ps1
+   ```
+   **Tip:** The [Run selected PowerShell script](https://marketplace.visualstudio.com/items?itemName=bvanderhorn.run-selected-powershell-script) VS Code extension lets you right-click any `.ps1` file in the Explorer and run it directly, without needing a terminal.
+3. The built scripts are written to `dist/`. These have the schema inlined and are minified — share these with end users.
+
+The build step inlines the schema as a here-string and strips all comments and blank lines from the output.
