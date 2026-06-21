@@ -6,9 +6,10 @@ A PowerShell parser and technical documentation for the `.red` file format used 
 
 | File | Description |
 |------|-------------|
-| [`scripts/ParseRedToJson.ps1`](scripts/ParseRedToJson.ps1) | Reads all `.red` files from `/userdata` and writes one `.json` per file to `/userjson`. |
-| [`scripts/ParseJsonToRed.ps1`](scripts/ParseJsonToRed.ps1) | Validates and reads all `.json` files from `/userjson` and writes one `.red` per file to `/userdata`. |
-| [`spec/race.schema.json`](spec/race.schema.json) | JSON Schema (Draft 2020-12) for the race JSON format. Single source of truth for all enum data; the parser reads its lookup tables directly from this file. |
+| [`src/ParseRedToJson.ps1`](src/ParseRedToJson.ps1) | Reads all `.red` files from `/userdata` and writes one `.json` per file to `/userjson`. |
+| [`src/ParseJsonToRed.ps1`](src/ParseJsonToRed.ps1) | Validates and reads all `.json` files from `/userjson` and writes one `.red` per file to `/userdata`. |
+| [`src/race.schema.json`](src/race.schema.json) | JSON Schema (Draft 2020-12) for the race JSON format. Single source of truth for all enum data; the parser reads its lookup tables directly from this file. |
+| [`dev/Build.ps1`](dev/Build.ps1) | Inlines the schema into each source script and writes standalone output scripts to `dist/`. |
 | [`docs/RedFileFormat.md`](docs/RedFileFormat.md) | Full technical documentation of the `.red` binary format: byte map, enumerations, checkpoint layout, parsing rules, serialization rules, and padding sentinels. |
 | [`docs/PowershellNotes.md`](docs/PowershellNotes.md) | Notes and constraints for letting Github Copilot run PowerShell scripts in VS Code. |
 

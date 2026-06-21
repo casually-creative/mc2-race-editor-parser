@@ -1,9 +1,8 @@
 # Midnight Club 2 Race Editor (.red) file parser
 # Reads all *.red files from ./userdata/ and writes one *.json per file into ./userjson/
 
-# Load enum data from spec/race.schema.json — single source of truth
-$specDir    = Join-Path (Split-Path -Parent $PSScriptRoot) "spec"
-$schemaJson = Get-Content (Join-Path $specDir "race.schema.json") -Raw
+# Load enum data from race.schema.json — single source of truth
+$schemaJson = Get-Content (Join-Path $PSScriptRoot "race.schema.json") -Raw
 $schema     = $schemaJson | ConvertFrom-Json
 
 $cities       = [string[]]$schema.properties.city.enum
