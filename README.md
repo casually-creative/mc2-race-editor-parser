@@ -2,17 +2,6 @@
 
 A PowerShell parser and technical documentation for the `.red` file format used by Midnight Club 2's in-game Race Editor. Each `.red` file is a fixed-size 222-byte binary file describing one custom race - including city, time of day, weather, race mode, CPU opponents, checkpoints, time bonuses, and lap count.
 
-## Contents
-
-| File | Description |
-|------|-------------|
-| [`src/ParseRedToJson.ps1`](src/ParseRedToJson.ps1) | Reads all `.red` files from `/userdata` and writes one `.json` per file to `/userjson`. |
-| [`src/ParseJsonToRed.ps1`](src/ParseJsonToRed.ps1) | Validates and reads all `.json` files from `/userjson` and writes one `.red` per file to `/userdata`. |
-| [`src/race.schema.json`](src/race.schema.json) | JSON Schema (Draft 2020-12) for the race JSON format. Single source of truth for all enum data; the parser reads its lookup tables directly from this file. |
-| [`dev/Build.ps1`](dev/Build.ps1) | Inlines the schema into each source script and writes standalone output scripts to `dist/`. |
-| [`docs/RedFileFormat.md`](docs/RedFileFormat.md) | Full technical documentation of the `.red` binary format: byte map, enumerations, checkpoint layout, parsing rules, serialization rules, and padding sentinels. |
-| [`docs/PowershellNotes.md`](docs/PowershellNotes.md) | Notes and constraints for letting Github Copilot run PowerShell scripts in VS Code. |
-
 ## Usage
 
 1. Make a backup of your `/userdata` folder, just in case.
@@ -35,3 +24,14 @@ The scripts in `src/` are the source of truth. They reference `src/race.schema.j
 3. The built scripts are written to `dist/`. These have the schema inlined and are minified — share these with end users.
 
 The build step inlines the schema as a here-string and strips all comments and blank lines from the output.
+
+## Contents
+
+| File | Description |
+|------|-------------|
+| [`src/ParseRedToJson.ps1`](src/ParseRedToJson.ps1) | Reads all `.red` files from `/userdata` and writes one `.json` per file to `/userjson`. |
+| [`src/ParseJsonToRed.ps1`](src/ParseJsonToRed.ps1) | Validates and reads all `.json` files from `/userjson` and writes one `.red` per file to `/userdata`. |
+| [`src/race.schema.json`](src/race.schema.json) | JSON Schema (Draft 2020-12) for the race JSON format. Single source of truth for all enum data; the parser reads its lookup tables directly from this file. |
+| [`dev/Build.ps1`](dev/Build.ps1) | Inlines the schema into each source script and writes standalone output scripts to `dist/`. |
+| [`docs/RedFileFormat.md`](docs/RedFileFormat.md) | Full technical documentation of the `.red` binary format: byte map, enumerations, checkpoint layout, parsing rules, serialization rules, and padding sentinels. |
+| [`docs/PowershellNotes.md`](docs/PowershellNotes.md) | Notes and constraints for letting Github Copilot run PowerShell scripts in VS Code. |
